@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+{% block content %}
+<div id="chat-window"></div>
+<form id="chat-form">
+    <input type="text" id="message" placeholder="Type your message">
+    <button type="submit">Send</button>
+</form>
+
+<script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+<script>
+    const socket = io();
+
+    // You can change 'room1' dynamically based on user choice or session
+    const room = 'room1';  // Static room for demonstration
+    const username = '{{ username }}';  // Dynamically pass username from Flask template
+
+    // Emit message along with room and username
+    const form = document.getElementById('chat-form');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('message').value;
+        socket.emit('message', { 
+            username: username, 
+            message: msg, 
+            room: room  // Include room
+        });
+        document.getElementById('message').value = '';
+    });
+
+    // Listen for incoming messages
+    socket.on('message', (data) => {
+        const chatWindow = document.getElementById('chat-window');
+        chatWindow.innerHTML += `<p><strong>${data.username}</strong>: ${data.message}</p>`;
+    });
+</script>
+{% endblock %}
